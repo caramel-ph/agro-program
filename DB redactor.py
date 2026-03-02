@@ -24,6 +24,15 @@ import subprocess
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+root = Tk()
+# Получаем ширину и высоту экрана
+scwidth = root.winfo_screenwidth()
+scheight = root.winfo_screenheight()
+# Закрываем экземпляресли окно не нужно
+root.destroy()
+
+
+
 sheetindicator1 = 0
 sheetindicator2 = 0
 tab2indicator1 = 0
@@ -157,7 +166,7 @@ def crsheet1():         #######  Вход!!! Загрузка таблицы
     cur.execute('PRAGMA table_info("mytable")')
     column_names = [i[1] for i in cur.fetchall()]
 
-    sheet1 = Sheet(frame1, width = 1100, height=400, headers = column_names,data = [[f"{art[r][c]}" for c in range(len(art[0]))] for r in range(len(art))]) 
+    sheet1 = Sheet(frame1, width = int(0.7*scwidth), height=400, headers = column_names,data = [[f"{art[r][c]}" for c in range(len(art[0]))] for r in range(len(art))]) 
     sheet1.enable_bindings()        # редактируется таблица . есть контекстное меню  
     sheet1.pack(side=LEFT)
     sheet1.extra_bindings([("cell_select", cell_select)])
@@ -166,7 +175,7 @@ def crsheet1():         #######  Вход!!! Загрузка таблицы
     
 def cell_select(response):      ###########  ######    Click  on tabl_1
     save_click_tab2()
-    print("cell_select")
+    #print("cell_select")
     global sheet1
     global sheet2
     global sheetindicator1
@@ -219,16 +228,20 @@ def cell_select(response):      ###########  ######    Click  on tabl_1
    
 
     cur.execute("SELECT фото FROM mytable")
+
+    geometry = window.geometry()
+    winwidth = int(geometry.split('x')[0])
+    winheight = window.winfo_screenheight()
     try:
         
         img_oo = cur.fetchall()[row]
         print("./photo/"+str(img_oo[0])+".jpg")
         imeg_o = Image.open("./photo/"+str(img_oo[0])+".jpg")
-        img = ImageOps.contain(imeg_o, (380*2, 380*2))
+        img = ImageOps.contain(imeg_o, (int(winwidth - 0.7*scwidth), 400))
         imeg = ImageTk.PhotoImage(img)
-        canv = Canvas(frame1, width=300, height=380, bg="#eeeeee")
-        #canv.place(x=820,y=0)
-        canv.create_image(20, 20, anchor="center", image=imeg)
+        canv = Canvas(frame1, width=int(winwidth - 0.7*scwidth), height=400, bg="#ffffff")
+        canv.place(x=0,y=0)
+        canv.create_image(int((winwidth - 0.7*scwidth)/2), 200, anchor="center", image=imeg)
         canv.pack(anchor=E)    #  anchor=CENTER, expand=1
         canvindicator1=1
     except FileNotFoundError:
@@ -364,7 +377,9 @@ try:
 except Exception:
     0
 
-window.geometry('1366x768')
+#window.geometry('1366x768')
+window.geometry(f"{scwidth}x{scheight}")
+print(scwidth)
 
 frame1 = ttk.Frame(borderwidth=2, relief=RAISED)
 frame2 = ttk.Frame(borderwidth=2, relief=RAISED)
